@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>从零手写 Transformer · 逐层拆解注意力机制</title>
+<meta name="description" content="用 6 个 Python 文件、681 行 PyTorch 代码，从词嵌入与位置编码写到编码器堆叠与解码器生成，每一层配图解、公式与张量形状追踪。">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Ctext x='16' y='22' font-size='15' text-anchor='middle' fill='white' font-family='monospace'%3ET%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<div id="progress"></div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top"><span class="brand-mark">T</span><span class="brand-name">Transformer 拆解笔记</span></a>
+    <div class="nav-links">
+      <a href="#why">为什么</a>
+      <a href="#arch">架构</a>
+      <a href="#input">输入</a>
+      <a href="#attention">注意力</a>
+      <a href="#multihead">多头</a>
+      <a href="#ffn">前馈</a>
+      <a href="#norm">归一化</a>
+      <a href="#encoder">编码器</a>
+      <a href="#decoder">解码器</a>
+      <a href="#assemble">组装</a>
+      <a href="#run">运行</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <div>
+      <div class="eyebrow">人工智能基础与应用 · 课程作品</div>
+      <h1>从零手写<br><span class="grad">Transformer</span></h1>
+      <p class="hero-lede">
+        不调用任何现成模型，只用 <code class="inline">torch.nn</code> 的基础件，
+        从词嵌入、位置编码一路写到六层编码器堆叠与解码器逐词生成。
+        这一页按数据流动的顺序展开：每一层都配一张结构图、一条公式，
+        以及一段可以直接跑通的代码。
+      </p>
+      <div class="hero-meta">
+        <span class="chip"><b>6</b> 个 Python 模块</span>
+        <span class="chip"><b>681</b> 行代码</span>
+        <span class="chip"><b>8</b> 个注意力头</span>
+        <span class="chip"><b>512</b> 维词向量</span>
+        <span class="chip"><b>N=6</b> 层堆叠</span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#why">开始逐层阅读 →</a>
+        <a class="btn btn-ghost" href="src/dm06_transformer.py">查看完整源码</a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="stack-card" style="top:0"><span class="dot" style="background:#2563eb"></span><span class="name">输入部分 · 嵌入 + 位置编码</span><span class="shapes">[2,5,512]</span></div>
+      <div class="stack-card" style="top:82px;right:18px"><span class="dot" style="background:#0891b2"></span><span class="name">编码器层 × 6</span><span class="shapes">[2,5,512]</span></div>
+      <div class="stack-card" style="top:164px;right:36px"><span class="dot" style="background:#7c3aed"></span><span class="name">解码器层 × 6</span><span class="shapes">[2,5,512]</span></div>
+      <div class="stack-card" style="top:246px;right:54px"><span class="dot" style="background:#b45309"></span><span class="name">线性层 + Softmax</span><span class="shapes">[2,5,1000]</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ========================================================== 01 -->
+<section class="section" id="why">
+  <div class="sec-head">
+    <div class="sec-num">01 — Motivation</div>
+    <h2 class="sec-title">为什么要有 Transformer</h2>
+    <p class="sec-lede">
+      在它出现之前，处理序列的主流方案是 RNN：一个词一个词地读，把历史压进一个隐藏状态。
+      这带来了两个绕不开的麻烦——算得慢，以及记不住。
+    </p>
+  </div>
+
+  <p>
+    RNN 的第 <em>t</em> 步必须等第 <em>t−1</em> 步算完，训练时无法并行；而且第一个词的信息要穿过
+    十几个隐藏状态才能影响最后一个词，距离一远就衰减得厉害。Transformer 的做法很干脆：
+    <strong>把「顺序」这件事交给位置编码，把「关联」这件事交给注意力</strong>。
+    任意两个位置之间只有一步计算，既并行，也不丢距离。
+  </p>
+
+  <figure class="figure reveal">
+    <div class="canvas"><img src="assets/rnn-vs-transformer.svg" alt="RNN 串行链与 Transformer 全连接注意力对比"></div>
+    <figcaption><b>图 1</b> · 左：RNN 的信息只能沿链条传递；右：Transformer 中每个 token 与其余所有 token 直接相连，一次算完。</figcaption>
+  </figure>
+
+  <ul class="tight">
+    <li><strong>并行</strong>：整句话被展成一个矩阵 <code class="inline">[batch, seq_len, d_model]</code>，一次前向就能算完全部位置。</li>
+    <li><strong>短路径</strong>：任意两词的距离恒为 1，长依赖不再需要「接力」。</li>
+    <li><strong>可观察</strong>：注意力权重本身就是一张可解释的热力图，能看出模型在关注谁。</li>
+  </ul>
+
+  <div class="callout key">
+    <div class="ico">i</div>
+    <div>
+      <span class="ctitle">这个作品的边界</span>
+      <p>页面里的代码不涉及预训练、大规模语料和分布式训练，也不追求翻译效果。目标只有一个：
+      把结构本身写清楚——每个模块都能单独实例化、跑一次前向、打印出张量形状。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 02 -->
+<section class="section" id="arch">
+  <div class="sec-head">
+    <div class="sec-num">02 — Architecture</div>
+    <h2 class="sec-title">整体架构：四条流水线，六层堆叠</h2>
+    <p class="sec-lede">
+      整个模型可以拆成四块：输入部分、编码器、解码器、输出部分。下面的图就是这四块的位置关系，
+      后面每一节都会对应到其中一个方块。
+    </p>
+  </div>
+
+  <figure class="figure wide reveal">
+    <div class="canvas"><img src="assets/arch-overall.svg" alt="Transformer 整体架构图"></div>
+    <figcaption><b>图 2</b> · 编码器（左）逐层提炼输入的上下文表示；解码器（右）在每一步结合「已生成的词」与「编码器输出」预测下一个词。</figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>部分</th><th>包含什么</th><th>对应文件</th><th>作用</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>输入部分</b></td><td>词嵌入 + 位置编码</td><td class="mono">dm01_input.py</td><td>把词索引变成带位置信息的稠密向量</td></tr>
+        <tr><td><b>编码器</b></td><td>自注意力 + 前馈 + 残差归一化，× N</td><td class="mono">dm02 / dm03 / dm04</td><td>读入整句，输出每个位置的上下文表示</td></tr>
+        <tr><td><b>解码器</b></td><td>掩码自注意力 + 交叉注意力 + 前馈，× N</td><td class="mono">dm03 / dm05</td><td>按已生成的历史，逐词预测下一个词</td></tr>
+        <tr><td><b>输出部分</b></td><td>线性层 + Softmax</td><td class="mono">dm05（Generator）</td><td>把向量映射到词表上的概率分布</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="shapes">
+    <span>一次前向的形状主线</span>
+    <span class="tag">[2, 5]</span><span class="arrow">→</span>
+    <span class="tag">[2, 5, 512]</span><span class="arrow">→</span>
+    <span class="tag">[2, 5, 512]</span><span class="arrow">→</span>
+    <span class="tag">[2, 5, 1000]</span>
+    <span style="margin-left:6px">（batch=2，句长=5，词表=1000）</span>
+  </div>
+</section>
+
+<!-- ========================================================== 03 -->
+<section class="section" id="input">
+  <div class="sec-head">
+    <div class="sec-num">03 — Input</div>
+    <h2 class="sec-title">输入部分：词嵌入与位置编码</h2>
+    <p class="sec-lede">
+      <code class="inline">dm01_input.py</code> 做了两件事：把词索引查表成 512 维向量，
+      再给每个向量加上一个「位置指纹」。少了后者，模型看「我爱学习」和「学习爱我」是完全一样的。
+    </p>
+  </div>
+
+  <h3>3.1 词嵌入：查表 + 缩放</h3>
+  <p>
+    <code class="inline">nn.Embedding</code> 本质上是一张 <code class="inline">vocab_size × d_model</code> 的可训练查找表。
+    前向时它把输入的整数索引换成对应的行向量，再乘上 <code class="inline">√d_model</code>。
+    这一步缩放不是装饰：位置编码的数值范围在 ±1 之间，若词向量量级太小，两者相加时位置信号会把语义淹没。
+  </p>
+
+  <!--CODE dm01_input.py 17 31-->
+
+  <div class="shapes">
+    <span>形状</span>
+    <span class="tag">x: [2, 5]</span><span class="arrow">→</span>
+    <span class="tag">embed(x): [2, 5, 512]</span><span class="arrow">×√512 →</span>
+    <span class="tag">[2, 5, 512]</span>
+  </div>
+
+  <p>用一个 2×5 的假句子验证一下，打印出来的形状正是 <code class="inline">torch.Size([2, 5, 512])</code>：</p>
+
+  <!--CODE dm01_input.py 36 48-->
+
+  <h3>3.2 位置编码：用正弦波给每个位置盖章</h3>
+  <p>
+    Transformer 没有循环结构，也就没有天然的「第几个词」的概念。论文给出的办法是用一组不同频率的正余弦函数，
+    为每个位置生成一个唯一的 512 维向量，再与词向量逐元素相加。
+  </p>
+
+  <div class="formula">
+    PE<sub>(pos, 2i)</sub> <span class="op">=</span> sin<span class="op">(</span>pos / 10000<sup>2i/d<sub>model</sub></sup><span class="op">)</span>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    PE<sub>(pos, 2i+1)</sub> <span class="op">=</span> cos<span class="op">(</span>pos / 10000<sup>2i/d<sub>model</sub></sup><span class="op">)</span>
+    <span class="note">偶数维用 sin，奇数维用 cos；i 越大，波长越长，从「秒级」一直拉到「千级」</span>
+  </div>
+
+  <p>
+    把 120 个位置 × 512 维的编码矩阵画出来，就是下面的波浪：左侧高频震荡、右侧近乎平缓，
+    每一行（每个位置）都是一组独一无二的条纹组合。这种设计还有个额外好处——
+    任意两个位置的相对距离可以用线性变换表达，模型因此更容易学到「隔几个词」的概念。
+  </p>
+
+  <figure class="figure reveal">
+    <div class="canvas tight">
+      <div class="wave">
+        <div class="y-label">位置 pos 0 → 119</div>
+        <img src="assets/pe_heatmap.png" alt="位置编码矩阵热力图">
+        <div class="x-axis"><span>i = 0</span><span>词向量维度 i（只取偶数维）→ 510</span><span>i = 510</span></div>
+      </div>
+    </div>
+    <figcaption><b>图 3</b> · 位置编码矩阵 PE[120 × 512] 的 sin 分量（偶数维，共 256 列）。红色为 +1，蓝色为 −1；沿维度方向波长以指数级变长，越靠右越接近恒定。</figcaption>
+  </figure>
+
+  <figure class="figure reveal">
+    <div class="canvas"><img src="assets/pe_curves.png" alt="不同维度的正弦曲线"></div>
+    <figcaption><b>图 4</b> · 抽出 4 个维度看曲线：i = 0 每个位置都在翻转，i = 192 走完 100 个位置才勉强一个半周期。</figcaption>
+  </figure>
+
+  <p>对应代码只有十几行，关键在于把「1 / 10000<sup>2i/d</sup>」改写成指数形式，避免逐元素求幂：</p>
+
+  <!--CODE dm01_input.py 52 99-->
+
+  <div class="callout warn">
+    <div class="ico">!</div>
+    <div>
+      <span class="ctitle">两个容易踩到的点</span>
+      <p>一是 <code class="inline">max_len</code> 的默认值是 50，但注释里写着 5000——句子超过 50 个词就会在
+      <code class="inline">self.pe[:, :x.size(1), :]</code> 处切片越界，得先改这个参数。
+      二是 <code class="inline">pe</code> 用 <code class="inline">register_buffer</code> 注册而不是存成普通属性，
+      这样它跟着模型一起搬到 GPU，但不会被当成参数更新。</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <div class="ico">✓</div>
+    <div>
+      <span class="ctitle">为什么这样算等价</span>
+      <p><code class="inline">exp(arange(0, d, 2) * (-log(10000)/d)</code> 就是 <code class="inline">10000^(-2i/d)</code>，
+      取负号是因为公式里它是分母。写成 exp/log 的形式，既能避免 <code class="inline">10000 ** (2i/d)</code> 溢出，
+      也比逐项除法更快。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 04 -->
+<section class="section" id="attention">
+  <div class="sec-head">
+    <div class="sec-num">04 — Attention</div>
+    <h2 class="sec-title">注意力机制：一句话里，谁该看谁</h2>
+    <p class="sec-lede">
+      注意力的核心是一次「软查询」：每个位置拿出一个 Query，去和所有位置的 Key 比对相似度，
+      再用相似度加权求和对应的 Value。就这么三步，没有任何循环。
+    </p>
+  </div>
+
+  <div class="formula">
+    Attention(Q, K, V) <span class="op">=</span> softmax<span class="op">(</span>
+    <span class="frac"><span>QK<sup>T</sup></span><span>√d<sub>k</sub></span></span>
+    <span class="op">)</span> V
+    <span class="note">QK<sup>T</sup> 得到 [seq_len × seq_len] 的相似度矩阵，softmax 逐行归一化成权重，再乘 V 做加权平均</span>
+  </div>
+
+  <figure class="figure wide reveal">
+    <div class="canvas"><img src="assets/attn-scaled.svg" alt="缩放点积注意力流程"></div>
+    <figcaption><b>图 5</b> · 缩放点积注意力：Q 与 K 相乘打分 → 除以 √d_k → 可选掩码 → Softmax → 与 V 相乘得到输出。</figcaption>
+  </figure>
+
+  <p>
+    为什么要除以 <code class="inline">√d_k</code>？因为两个 64 维随机向量的点积方差约为 64，
+    不做缩放的话数值会大到让 softmax 退化成「赢者通吃」的硬选择，梯度几乎为零。
+    除以维度平方根，正好把方差拉回 1 附近。
+  </p>
+
+  <!--CODE dm01_input.py 123 143-->
+
+  <p>
+    代码里唯一的分支是掩码：凡是 <code class="inline">mask == 0</code> 的位置都被填成 <code class="inline">-1e9</code>，
+    经过 softmax 后这些位置的权重约等于 0，等于「物理屏蔽」。掩码在解码器里尤其关键——
+    生成第 3 个词时绝不能看到第 4、5 个词。
+  </p>
+
+  <figure class="figure reveal">
+    <div class="canvas"><img src="assets/attention_mask.png" alt="注意力权重与掩码对比"></div>
+    <figcaption><b>图 6</b> · 左：普通自注意力，每行权重铺满全部位置；右：加上因果掩码后，每个词只能看到自己与左侧历史，右上半区被压成 0。</figcaption>
+  </figure>
+
+  <div class="callout tip">
+    <div class="ico">✓</div>
+    <div>
+      <span class="ctitle">一个易忽略的细节</span>
+      <p><code class="inline">mask.unsqueeze(0)</code> 把 <code class="inline">[head, seq, seq]</code> 升成
+      <code class="inline">[1, head, seq, seq]</code>，是为了和 <code class="inline">[batch, head, seq, seq]</code>
+      的注意力分数做广播——batch 维上的 1 会自动复制到每个样本。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 05 -->
+<section class="section" id="multihead">
+  <div class="sec-head">
+    <div class="sec-num">05 — Multi-Head</div>
+    <h2 class="sec-title">多头注意力：把 512 维切成 8 份并行看</h2>
+    <p class="sec-lede">
+      一组 Q/K/V 只能学到一种「关注方式」。多头把 512 维拆成 8 个 64 维的子空间，
+      让 8 个头各自去学不同的关系（指代、句法、邻近……），最后拼回来再投影一次。
+    </p>
+  </div>
+
+  <figure class="figure wide reveal">
+    <div class="canvas"><img src="assets/multihead.svg" alt="多头注意力结构"></div>
+    <figcaption><b>图 7</b> · 输入先经三组线性投影得到 Q、K、V，各自 reshape 成 8 个头；每个头独立做一次缩放点积注意力，再拼接、过 W<sup>O</sup> 还原成 512 维。</figcaption>
+  </figure>
+
+  <p>
+    代码里最值得盯住的是那三行 <code class="inline">view</code> 与 <code class="inline">transpose</code>：
+    形状从 <code class="inline">[2, 5, 512]</code> 变成 <code class="inline">[2, 5, 8, 64]</code>，
+    再转置成 <code class="inline">[2, 8, 5, 64]</code>——把「头」提到 batch 后面，
+    这样 8 个头就变成了 8 个独立的样本，后续的 <code class="inline">attention()</code> 一行都不用改。
+  </p>
+
+  <!--CODE dm02_selfattension.py 6 41-->
+
+  <div class="shapes">
+    <span>形状追踪（以 batch=2、句长=5、8 头为例）</span>
+    <span class="tag">Q: [2,5,512]</span><span class="arrow">→ view</span>
+    <span class="tag">[2,5,8,64]</span><span class="arrow">→ transpose</span>
+    <span class="tag">[2,8,5,64]</span>
+  </div>
+  <div class="shapes">
+    <span>注意力分数</span>
+    <span class="tag">[2,8,5,5]</span><span class="arrow">→ 加权后</span>
+    <span class="tag">[2,8,5,64]</span><span class="arrow">→ 合并头</span>
+    <span class="tag">[2,5,512]</span>
+  </div>
+
+  <p>
+    这里的 <code class="inline">clones</code> 用 <code class="inline">copy.deepcopy</code> 复制了 4 个
+    <code class="inline">nn.Linear</code>——Q、K、V 各一个，加上输出投影一个。必须是深拷贝：
+    若直接写 <code class="inline">[nn.Linear(...)] * 4</code>，四个位置会共享同一份参数，模型就退化成单头了。
+  </p>
+
+  <div class="callout key">
+    <div class="ico">i</div>
+    <div>
+      <span class="ctitle">计算量并没有翻 8 倍</span>
+      <p>8 个头、每头 64 维，总维度和单头 512 维完全相同。多头不是「算 8 遍」，而是把同一份预算切成 8 份并行使用，
+      参数量基本不变，表达却更丰富。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 06 -->
+<section class="section" id="ffn">
+  <div class="sec-head">
+    <div class="sec-num">06 — Feed Forward</div>
+    <h2 class="sec-title">前馈网络：逐个位置做一次「深加工」</h2>
+    <p class="sec-lede">
+      注意力负责在位置之间搬运信息，前馈网络负责在每个位置上独立地做非线性变换。
+      两层线性 + 一个 ReLU，中间维度放大 2~4 倍。
+    </p>
+  </div>
+
+  <div class="formula">
+    FFN(x) <span class="op">=</span> W<sub>2</sub> · ReLU(W<sub>1</sub>x + b<sub>1</sub>) + b<sub>2</sub>
+    <span class="note">W<sub>1</sub>: 512 → 1024（或 2048），W<sub>2</sub>: 1024 → 512</span>
+  </div>
+
+  <!--CODE dm02_selfattension.py 66 78-->
+
+  <p>
+    注意它是对<strong>最后一维</strong>做变换：输入 <code class="inline">[2, 5, 512]</code>，
+    中间变成 <code class="inline">[2, 5, 1024]</code>，输出回到 <code class="inline">[2, 5, 512]</code>。
+    <code class="inline">nn.Linear</code> 只作用于最后一维，前两个维度（batch 与句长）原封不动，
+    所以 5 个位置之间互不干扰——这也是它和注意力最本质的分工。
+  </p>
+
+  <div class="callout tip">
+    <div class="ico">✓</div>
+    <div>
+      <span class="ctitle">为什么中间要变宽</span>
+      <p>先升维再降维，相当于在一个更高维的空间里做非线性筛选，然后再压缩回原来的通道数。
+      如果只用一个线性层，整个 FFN 就退化成矩阵乘法，叠多少层都等价于一层。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 07 -->
+<section class="section" id="norm">
+  <div class="sec-head">
+    <div class="sec-num">07 — Norm &amp; Residual</div>
+    <h2 class="sec-title">层归一化与残差：让六层能叠起来</h2>
+    <p class="sec-lede">
+      单独一个子层好写，难的是把六个这样的子层串起来还不崩。残差连接保住原始信息，
+      层归一化把数值拉回稳定区间——这两样是整个堆叠能训练的前提。
+    </p>
+  </div>
+
+  <div class="formula">
+    LayerNorm(x) <span class="op">=</span> a <span class="op">·</span>
+    <span class="frac"><span>x − μ</span><span>σ + ε</span></span>
+    <span class="op">+</span> b
+    <span class="note">μ、σ 沿最后一维（512 个特征）统计；a、b 是可学习的缩放与平移，初始为 1 和 0</span>
+  </div>
+
+  <p>
+    这里最容易和 BatchNorm 搞混。区别在于「沿哪个方向统计」：BatchNorm 对同一个特征、跨样本求均值；
+    LayerNorm 对同一个样本、跨特征求均值。序列任务里句长参差不齐，跨样本统计会被 padding 带偏，
+    所以 Transformer 一律用 LayerNorm。
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>对比项</th><th>BatchNorm</th><th>LayerNorm</th></tr></thead>
+      <tbody>
+        <tr><td>统计方向</td><td>同一特征、不同样本</td><td>同一样本、不同特征</td></tr>
+        <tr><td>常见场景</td><td>图像（CNN）</td><td>序列（RNN / Transformer）</td></tr>
+        <tr><td>对 batch 大小</td><td>敏感，小 batch 波动大</td><td>不敏感</td></tr>
+        <tr><td>推理时</td><td>依赖训练期累计的均值方差</td><td>逐样本即时计算，训练推理一致</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!--CODE dm03_NormandAdd.py 6 24-->
+
+  <p>
+    残差连接则把子层的输入原样加到输出上。对六层堆叠来说，这等于给梯度开了一条直通车道：
+    反向传播时即便某一层的梯度很小，也能沿着 <code class="inline">+ x</code> 这条捷径传回去。
+    代码把它封装成 <code class="inline">SublayerConnection</code>，任何子层都能套进去：
+  </p>
+
+  <!--CODE dm03_NormandAdd.py 44 55-->
+
+  <div class="callout warn">
+    <div class="ico">!</div>
+    <div>
+      <span class="ctitle">这一版的归一化，既不是 Post-LN，也不是标准 Pre-LN</span>
+      <p>论文原版是 Post-LN：<code class="inline">Norm(x + Sublayer(x))</code>，归一化包住整条残差支路。
+      后来被广泛采用的 Pre-LN 是 <code class="inline">x + Sublayer(Norm(x))</code>，归一化挪到子层入口。
+      而这版代码写的是 <code class="inline">x + Dropout(Norm(Sublayer(x)))</code>：归一化作用在子层输出上，
+      残差支路本身不经过归一化。也就是说，它只符合 Pre-LN 的一半——残差主轴不被归一化，
+      所以梯度更稳、可以省掉 warmup；但子层的输入仍是未归一化的原始 <code class="inline">x</code>。
+      三种写法都能训练，差别在数值稳定性上，读代码时先认清自己看的是哪一种。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 08 -->
+<section class="section" id="encoder">
+  <div class="sec-head">
+    <div class="sec-num">08 — Encoder</div>
+    <h2 class="sec-title">编码器层：两个子层，重复六次</h2>
+    <p class="sec-lede">
+      把前面几块拼起来：一个编码器层 = 多头自注意力 + 前馈网络，各自套一层残差与归一化；
+      再把这一层复制 6 份、最后补一次归一化，就是编码器。
+    </p>
+  </div>
+
+  <figure class="figure reveal">
+    <div class="canvas"><img src="assets/block-encoder.svg" alt="编码器层结构"></div>
+    <figcaption><b>图 8</b> · 编码器层：输入 x 分两路，一路进子层，一路作为残差直接叠加到归一化之后的输出上。</figcaption>
+  </figure>
+
+  <p>
+    代码结构非常直白：<code class="inline">clones(SublayerConnection(...), 2)</code> 造出两个连接器，
+    分别套在多头上注意力和前馈网络上。<code class="inline">lambda</code> 只是把 <code class="inline">mask</code>
+    提前绑定进去，让子层签名统一成「输入→输出」。
+  </p>
+
+  <!--CODE dm04_Encoderlayer.py 14 36-->
+
+  <p>
+    编码器本身只是一个循环 + 收尾的归一化。值得注意的是它并不改变形状——
+    进去 <code class="inline">[2, 5, 512]</code>，出来还是 <code class="inline">[2, 5, 512]</code>，
+    变的只是每个向量里「装了什么」。
+  </p>
+
+  <!--CODE dm04_Encoderlayer.py 57 73-->
+
+  <div class="callout tip">
+    <div class="ico">✓</div>
+    <div>
+      <span class="ctitle">为什么最后还要补一次 LayerNorm</span>
+      <p>上面那种「残差支路不归一化」的写法，会让主轴上的数值随层数累积放大，堆到第 6 层时已经偏离原点很远。
+      出口处再归一化一次，能把表示重新拉回稳定的分布，交给解码器使用。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 09 -->
+<section class="section" id="decoder">
+  <div class="sec-head">
+    <div class="sec-num">09 — Decoder</div>
+    <h2 class="sec-title">解码器层：三个子层，两套掩码</h2>
+    <p class="sec-lede">
+      解码器比编码器多了一个「交叉注意力」子层。它先用掩码自注意力看自己已经生成了什么，
+      再去编码器输出里查资料，最后前馈加工，输出下一个词的概率。
+    </p>
+  </div>
+
+  <figure class="figure reveal">
+    <div class="canvas"><img src="assets/block-decoder.svg" alt="解码器层结构"></div>
+    <figcaption><b>图 9</b> · 解码器层：掩码自注意力 → 交叉注意力（Q 来自解码器，K/V 来自编码器）→ 前馈，三层各自配残差与归一化。</figcaption>
+  </figure>
+
+  <p>
+    三个子层的输入输出各不相同，这是解码器最容易写错的地方：第一个子层是自注意力
+    <code class="inline">(x, x, x)</code>；第二个子层的 Q 用解码器当前的 x，而 K、V 都来自编码器输出
+    <code class="inline">(x, encoder_output, encoder_output)</code>；第三个子层就是普通前馈。
+  </p>
+
+  <!--CODE dm05_decoderlayer.py 22 52-->
+
+  <p>
+    两套掩码各管一件事：<code class="inline">target_mask</code> 是「未来掩码」，把当前位置右侧的分数填成
+    <code class="inline">-1e9</code>，防止训练时偷看答案；<code class="inline">source_mask</code> 是「padding 掩码」，
+    把补齐位的分数屏蔽掉，免得模型去关注 <code class="inline">&lt;pad&gt;</code>。
+  </p>
+
+  <!--CODE dm05_decoderlayer.py 92 105-->
+
+  <p>最末端的 <code class="inline">Generator</code> 把 512 维表示映射成词表上的对数概率：</p>
+
+  <!--CODE dm05_decoderlayer.py 144 151-->
+
+  <div class="callout warn">
+    <div class="ico">!</div>
+    <div>
+      <span class="ctitle">为什么是 log_softmax 而不是 softmax</span>
+      <p>配合 <code class="inline">nn.NLLLoss</code> 使用时，<code class="inline">log_softmax</code> 比「先 softmax 再取 log」
+      数值更稳：它把指数运算和归一化合并成一步，避免概率很小时 <code class="inline">log(0)</code> 溢出。
+      如果改用 <code class="inline">CrossEntropyLoss</code>，这里就该输出裸 logits。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 10 -->
+<section class="section" id="assemble">
+  <div class="sec-head">
+    <div class="sec-num">10 — Assembly</div>
+    <h2 class="sec-title">组装：一个 forward 串起全部</h2>
+    <p class="sec-lede">
+      最后一步是把四块零件装进一个容器。整个 <code class="inline">forward</code> 只有五行有效代码，
+      却把 681 行的零件全部串了起来。
+    </p>
+  </div>
+
+  <!--CODE dm06_transformer.py 8 35-->
+
+  <p>
+    数据在五个环节之间流动时，形状变了一次又一次，但只有最后一步才真正变大：
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>步骤</th><th>运算</th><th>输出形状</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="mono">source_embded(source_x)</td><td class="mono">[2, 5, 512]</td><td>词索引 → 向量 + 位置</td></tr>
+        <tr><td>2</td><td class="mono">encoder(x, source_mask)</td><td class="mono">[2, 5, 512]</td><td>六层上下文编码</td></tr>
+        <tr><td>3</td><td class="mono">target_embded(target_y)</td><td class="mono">[2, 5, 512]</td><td>已生成序列的嵌入</td></tr>
+        <tr><td>4</td><td class="mono">decoder(y, enc, ...)</td><td class="mono">[2, 5, 512]</td><td>融合编码器信息的表示</td></tr>
+        <tr><td>5</td><td class="mono">generator(dec)</td><td class="mono">[2, 5, 1000]</td><td>每个位置对 1000 个词的对数概率</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>下面这段就是可以直接跑起来的验证代码，用的全是假索引，只为确认形状与连接关系：</p>
+
+  <!--CODE dm06_transformer.py 39 76-->
+
+  <div class="callout key">
+    <div class="ico">i</div>
+    <div>
+      <span class="ctitle">训练和推理不是一回事</span>
+      <p>上面传进去的 <code class="inline">target_y</code> 是「真实答案」——这叫 teacher forcing，训练时并行喂入整句，
+      靠因果掩码保证不偷看未来。而真正生成时没有答案可喂，只能把上一步的输出接回输入，一个词一个词地滚。
+      这份代码只实现了前者，也就是训练路径。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== 11 -->
+<section class="section" id="run">
+  <div class="sec-head">
+    <div class="sec-num">11 — Run</div>
+    <h2 class="sec-title">运行与复现</h2>
+    <p class="sec-lede">
+      六个文件按依赖顺序串成一条链：每个模块 <code class="inline">import</code> 上一个模块，
+      自带 <code class="inline">__main__</code> 测试。想验证哪一层，直接跑那个文件即可。
+    </p>
+  </div>
+
+  <div class="run-grid">
+    <div class="run-card">
+      <span class="k">环境</span>
+      <h4>Python 3.8+ / PyTorch 1.10+</h4>
+      <p>只需要 <code class="inline">torch</code>、<code class="inline">numpy</code>；<code class="inline">matplotlib</code> 仅 <code class="inline">dm01</code> 里 import 了但未使用，可删。</p>
+    </div>
+    <div class="run-card">
+      <span class="k">依赖顺序</span>
+      <h4>01 → 02 → 03 → 04 → 05 → 06</h4>
+      <p><code class="inline">dm06</code> 导入 <code class="inline">dm05</code>，<code class="inline">dm05</code> 导入 <code class="inline">dm04</code>，一路回溯到 <code class="inline">dm01</code>。</p>
+    </div>
+    <div class="run-card">
+      <span class="k">预期输出</span>
+      <h4>全部是形状信息</h4>
+      <p>每个测试函数会打印各阶段的 <code class="inline">.shape</code>，最终 <code class="inline">output.shape: torch.Size([2, 5, 1000])</code>。</p>
+    </div>
+  </div>
+
+  <div class="code reveal">
+    <div class="code-head"><span class="fname">terminal</span><span class="range">快速验证</span>
+      <button class="copy" type="button">复制</button></div>
+    <pre><code><span class="tok-com"># 1. 装依赖</span>
+pip install torch numpy
+
+<span class="tok-com"># 2. 进入源码目录（六个文件必须在同一目录）</span>
+cd src
+
+<span class="tok-com"># 3. 逐层验证，随便挑一个跑</span>
+python dm01_input.py        <span class="tok-com"># 词嵌入 / 位置编码 / 注意力</span>
+python dm04_Encoderlayer.py <span class="tok-com"># 六层编码器</span>
+python dm06_transformer.py  <span class="tok-com"># 完整模型，输出 [2, 5, 1000]</span></code></pre>
+  </div>
+
+  <p>
+    如果只想看张量形状、不想看满屏打印，把各模块里的 <code class="inline">print</code> 删掉即可。
+    想换句子长度，记得同步改 <code class="inline">MultiHeadedAttention</code> 的
+    <code class="inline">seq_len</code> 参数——它写死在了 <code class="inline">view</code> 里。
+  </p>
+</section>
+
+<!-- ========================================================== 12 -->
+<section class="section" id="limits">
+  <div class="sec-head">
+    <div class="sec-num">12 — Limitations</div>
+    <h2 class="sec-title">这份实现的边界</h2>
+    <p class="sec-lede">
+      代码能跑通、能验证，但离「可训练的模型」还有距离。把不足写清楚，比假装它完美更有用。
+    </p>
+  </div>
+
+  <ul class="tight">
+    <li><strong>seq_len 被写死</strong>：<code class="inline">MultiHeadedAttention.forward</code> 用
+    <code class="inline">self.seq_len</code> 做 <code class="inline">view</code>，换个句长必须重新实例化；
+    正确做法是从 <code class="inline">query.size(1)</code> 动态取。</li>
+    <li><strong>没有掩码生成函数</strong>：<code class="inline">mask</code> 由外部传入 <code class="inline">torch.zeros(8,5,5)</code>，
+    只是占位。真要训练，得补 <code class="inline">padding_mask</code> 与 <code class="inline">subsequent_mask</code> 两个工具函数。</li>
+    <li><strong>没有训练循环</strong>：只有前向与形状验证，缺少优化器、损失、学习率调度和梯度裁剪。</li>
+    <li><strong>嵌入权重未共享</strong>：原论文让编码器、解码器与输出层共享同一张词嵌入表，并把权重乘 √d_model；这里用了两份独立拷贝。</li>
+    <li><strong>dropout=0.5 偏大</strong>：原始论文用的是 0.1，0.5 在推理/调试阶段会把表示打得太散。</li>
+    <li><strong>推理路径缺失</strong>：没有 greedy / beam search 的逐词生成，只能跑 teacher forcing。</li>
+  </ul>
+
+  <div class="callout quote">
+    <div class="ico">“</div>
+    <div>
+      <span class="ctitle">做这个项目最大的收获</span>
+      <p>结构图看一百遍，也不如自己把 <code class="inline">view</code>、<code class="inline">transpose</code>、
+      <code class="inline">contiguous</code> 写一遍——多头注意力的形状到底怎么翻，只有打印出来对着
+      <code class="inline">[2,8,5,64]</code> 数一遍才真的清楚。</p>
+    </div>
+  </div>
+</section>
+
+<div class="end">
+  <div>《人工智能基础与应用》课程作品 · 从零手写 Transformer</div>
+  <div><a href="#top">回到顶部 ↑</a> &nbsp;·&nbsp; <a href="src/dm01_input.py">源码目录</a> &nbsp;·&nbsp; <a href="README.md">运行说明</a></div>
+</div>
+
+</main>
+
+<script src="js/main.js"></script>
+</body>
+</html>

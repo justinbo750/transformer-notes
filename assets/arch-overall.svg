@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 100 1400 750" width="1400" height="750" font-family="'Inter','Noto Sans SC',system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+  <marker id="ar-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+  <marker id="ar-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+  <marker id="ar-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0891b2"/></marker>
+  <marker id="ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b45309"/></marker>
+  <marker id="ar-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker>
+</defs>
+<rect y="100" width="1400" height="750" fill="#ffffff"/>
+<rect x="280" y="230" width="320" height="430" rx="16" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5" opacity="0.1"/>
+<rect x="880" y="230" width="320" height="430" rx="16" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5" opacity="0.1"/>
+<rect x="270" y="240" width="320" height="430" rx="16" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5" opacity="0.18"/>
+<rect x="870" y="240" width="320" height="430" rx="16" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5" opacity="0.18"/>
+<rect x="260" y="250" width="320" height="430" rx="16" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+<rect x="860" y="250" width="320" height="430" rx="16" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="2"/>
+<text x="280" y="278" font-size="14" fill="#2563eb" text-anchor="start" font-weight="700" opacity="1.0" letter-spacing="1">编码器层 × 6</text>
+<text x="880" y="278" font-size="14" fill="#7c3aed" text-anchor="start" font-weight="700" opacity="1.0" letter-spacing="1">解码器层 × 6</text>
+<rect x="294" y="306" width="252" height="64" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="420.0" y="344.3" font-size="18" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">多头自注意力</text>
+<rect x="294" y="398" width="252" height="38" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="420.0" y="422.25" font-size="15" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">加 &amp; 归一化</text>
+<rect x="294" y="462" width="252" height="64" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="420.0" y="500.3" font-size="18" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">前馈全连接</text>
+<rect x="294" y="554" width="252" height="38" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="420.0" y="578.25" font-size="15" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">加 &amp; 归一化</text>
+<path d="M420.0,665 L420.0,594" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#ar-blue)"/>
+<path d="M420.0,554 L420.0,528" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#ar-blue)"/>
+<path d="M420.0,462 L420.0,438" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#ar-blue)"/>
+<path d="M420.0,398 L420.0,372" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#ar-blue)"/>
+<path d="M420.0,306 L420.0,216" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
+<rect x="894" y="282" width="252" height="48" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="1020.0" y="312.3" font-size="18" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">掩码多头自注意力</text>
+<rect x="894" y="344" width="252" height="30" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1020.0" y="364.25" font-size="15" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">加 &amp; 归一化</text>
+<rect x="894" y="388" width="252" height="48" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="1020.0" y="418.3" font-size="18" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">多头交叉注意力</text>
+<rect x="894" y="450" width="252" height="30" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1020.0" y="470.25" font-size="15" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">加 &amp; 归一化</text>
+<rect x="894" y="494" width="252" height="48" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="1020.0" y="524.3" font-size="18" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">前馈全连接</text>
+<rect x="894" y="556" width="252" height="30" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1020.0" y="576.25" font-size="15" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">加 &amp; 归一化</text>
+<path d="M1020.0,665 L1020.0,588" fill="none" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ar-purple)"/>
+<path d="M1020.0,556 L1020.0,544" fill="none" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ar-purple)"/>
+<path d="M1020.0,494 L1020.0,482" fill="none" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ar-purple)"/>
+<path d="M1020.0,450 L1020.0,438" fill="none" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ar-purple)"/>
+<path d="M1020.0,388 L1020.0,376" fill="none" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ar-purple)"/>
+<path d="M1020.0,344 L1020.0,332" fill="none" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ar-purple)"/>
+<path d="M1020.0,282 L1020.0,216" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#ar-purple)"/>
+<path d="M588,412 L850,412" fill="none" stroke="#7c3aed" stroke-width="2" marker-end="url(#ar-purple)"/>
+<text x="720.0" y="398" font-size="14" fill="#7c3aed" text-anchor="middle" font-weight="600" opacity="1.0">编码器输出作为 K, V</text>
+<rect x="74" y="750" width="150" height="48" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="149.0" y="778.2" font-size="12" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">输入序列</text>
+<text x="149" y="820" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">我 / 爱 / 学习</text>
+<path d="M226,774 L256,774" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="260" y="750" width="200" height="48" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="360.0" y="779.425" font-size="15.5" fill="#2563eb" text-anchor="middle" font-weight="600" opacity="1.0">输入嵌入</text>
+<path d="M420.0,750 L420.0,731" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#ar-blue)"/>
+<circle cx="420.0" cy="715" r="14" fill="#ffffff" stroke="#b45309" stroke-width="1.5"/>
+<text x="420.0" y="720.1" font-size="15" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">+</text>
+<text x="442.0" y="719" font-size="13.5" fill="#475569" text-anchor="start" font-weight="600" opacity="1.0">位置编码 PE</text>
+<path d="M420.0,699 L420.0,669" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#ar-blue)"/>
+<rect x="674" y="750" width="150" height="48" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="749.0" y="778.55" font-size="13" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">输出序列（右移）</text>
+<text x="749" y="820" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">&lt;SOS&gt; / 我 / 爱</text>
+<path d="M826,774 L856,774" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="860" y="750" width="200" height="48" rx="10" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+<text x="960.0" y="779.425" font-size="15.5" fill="#7c3aed" text-anchor="middle" font-weight="600" opacity="1.0">输出嵌入</text>
+<path d="M1020.0,750 L1020.0,731" fill="none" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ar-purple)"/>
+<circle cx="1020.0" cy="715" r="14" fill="#ffffff" stroke="#7c3aed" stroke-width="1.5"/>
+<text x="1020.0" y="720.1" font-size="15" fill="#7c3aed" text-anchor="middle" font-weight="600" opacity="1.0">+</text>
+<text x="1042.0" y="719" font-size="13.5" fill="#475569" text-anchor="start" font-weight="600" opacity="1.0">位置编码 PE</text>
+<path d="M1020.0,699 L1020.0,669" fill="none" stroke="#7c3aed" stroke-width="1.6" marker-end="url(#ar-purple)"/>
+<path d="M1020.0,216 L1020.0,168" fill="none" stroke="#7c3aed" stroke-width="1.8" marker-end="url(#ar-purple)"/>
+<rect x="920.0" y="112" width="200" height="54" rx="10" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+<text x="1020.0" y="144.075" font-size="14.5" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">线性 + Softmax</text>
+<text x="1134.0" y="134" font-size="13.5" fill="#94a3b8" text-anchor="start" font-weight="500" opacity="1.0">→ 词表概率分布</text>
+<text x="1134.0" y="154" font-size="13.5" fill="#94a3b8" text-anchor="start" font-weight="500" opacity="1.0">argmax → 下一个词</text>
+<text x="230" y="120" font-size="17" fill="#0f172a" text-anchor="start" font-weight="700" opacity="1.0">一句话：编码器把输入读成一组上下文向量，解码器据此一个词一个词地生成输出。</text>
+<text x="230" y="148" font-size="12" fill="#475569" text-anchor="start" font-weight="400" opacity="1.0">六层「自注意力 → 残差归一化 → 前馈 → 残差归一化」堆叠，全程没有循环，因此整句可以并行计算。</text>
+</svg>

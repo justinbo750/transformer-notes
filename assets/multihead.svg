@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 70 1210 356" width="1210" height="356" font-family="'Inter','Noto Sans SC',system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+  <marker id="ar-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+  <marker id="ar-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+  <marker id="ar-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0891b2"/></marker>
+  <marker id="ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b45309"/></marker>
+  <marker id="ar-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker>
+</defs>
+<rect y="70" width="1210" height="356" fill="#ffffff"/>
+<rect x="40" y="196" width="116" height="60" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="98.0" y="223.36499999999998" font-size="8.5" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">输入 X</text>
+<text x="98.0" y="234.58499999999998" font-size="8.5" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">[2, 5, 512]</text>
+<path d="M158,226 L186,226" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="188" y="120" width="176" height="212" rx="14" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="276" y="142" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="700" opacity="1.0" letter-spacing="1">线性投影</text>
+<rect x="202" y="152" width="148" height="46" rx="8" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="276.0" y="177.8" font-size="8.0" fill="#2563eb" text-anchor="middle" font-weight="600" opacity="1.0">W_Q · Linear(512, 512)</text>
+<rect x="202" y="205" width="148" height="46" rx="8" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="276.0" y="230.8" font-size="8.0" fill="#2563eb" text-anchor="middle" font-weight="600" opacity="1.0">W_K · Linear(512, 512)</text>
+<rect x="202" y="258" width="148" height="46" rx="8" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5"/>
+<text x="276.0" y="283.8" font-size="8.0" fill="#2563eb" text-anchor="middle" font-weight="600" opacity="1.0">W_V · Linear(512, 512)</text>
+<path d="M366,226 L404,226" fill="none" stroke="#475569" stroke-width="1.7" marker-end="url(#ar)"/>
+<rect x="396" y="80" width="532" height="300" rx="16" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+<text x="662.0" y="104" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="600" opacity="1.0" letter-spacing="0.5">8 个注意力头 · 并行计算</text>
+<rect x="406" y="120" width="116" height="234" rx="12" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1.5"/>
+<text x="464.0" y="142" font-size="13" fill="#0891b2" text-anchor="middle" font-weight="700" opacity="1.0">头 1</text>
+<rect x="418" y="154" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="464.0" y="177.52" font-size="8.0" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">Q · Kᵀ</text>
+<text x="464.0" y="188.08" font-size="8.0" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">缩放 1/√d_k</text>
+<rect x="418" y="226" width="92" height="38" rx="8" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+<text x="464.0" y="248.5" font-size="10.0" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">Softmax</text>
+<rect x="418" y="284" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="464.0" y="306.59000000000003" font-size="11" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">权重 × V</text>
+<text x="464.0" y="321.11" font-size="11" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">得到头输出</text>
+<path d="M464.0,206 L464.0,224" fill="none" stroke="#475569" stroke-width="1.2" marker-end="url(#ar)"/>
+<path d="M464.0,264 L464.0,282" fill="none" stroke="#475569" stroke-width="1.2" marker-end="url(#ar)"/>
+<rect x="538" y="120" width="116" height="234" rx="12" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1.5"/>
+<text x="596.0" y="142" font-size="13" fill="#0891b2" text-anchor="middle" font-weight="700" opacity="1.0">头 2</text>
+<rect x="550" y="154" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="596.0" y="177.52" font-size="8.0" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">Q · Kᵀ</text>
+<text x="596.0" y="188.08" font-size="8.0" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">缩放 1/√d_k</text>
+<rect x="550" y="226" width="92" height="38" rx="8" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+<text x="596.0" y="248.5" font-size="10.0" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">Softmax</text>
+<rect x="550" y="284" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="596.0" y="306.59000000000003" font-size="11" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">权重 × V</text>
+<text x="596.0" y="321.11" font-size="11" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">得到头输出</text>
+<path d="M596.0,206 L596.0,224" fill="none" stroke="#475569" stroke-width="1.2" marker-end="url(#ar)"/>
+<path d="M596.0,264 L596.0,282" fill="none" stroke="#475569" stroke-width="1.2" marker-end="url(#ar)"/>
+<rect x="670" y="120" width="116" height="234" rx="12" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1.5"/>
+<text x="728.0" y="142" font-size="13" fill="#0891b2" text-anchor="middle" font-weight="700" opacity="1.0">头 3</text>
+<rect x="682" y="154" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="728.0" y="177.52" font-size="8.0" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">Q · Kᵀ</text>
+<text x="728.0" y="188.08" font-size="8.0" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">缩放 1/√d_k</text>
+<rect x="682" y="226" width="92" height="38" rx="8" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+<text x="728.0" y="248.5" font-size="10.0" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">Softmax</text>
+<rect x="682" y="284" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="728.0" y="306.59000000000003" font-size="11" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">权重 × V</text>
+<text x="728.0" y="321.11" font-size="11" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">得到头输出</text>
+<path d="M728.0,206 L728.0,224" fill="none" stroke="#475569" stroke-width="1.2" marker-end="url(#ar)"/>
+<path d="M728.0,264 L728.0,282" fill="none" stroke="#475569" stroke-width="1.2" marker-end="url(#ar)"/>
+<rect x="802" y="120" width="116" height="234" rx="12" fill="#ecfeff" stroke="#a5f3fc" stroke-width="1.5"/>
+<text x="860.0" y="142" font-size="13" fill="#0891b2" text-anchor="middle" font-weight="700" opacity="1.0">头 4</text>
+<rect x="814" y="154" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="860.0" y="177.52" font-size="8.0" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">Q · Kᵀ</text>
+<text x="860.0" y="188.08" font-size="8.0" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">缩放 1/√d_k</text>
+<rect x="814" y="226" width="92" height="38" rx="8" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+<text x="860.0" y="248.5" font-size="10.0" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">Softmax</text>
+<rect x="814" y="284" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="860.0" y="306.59000000000003" font-size="11" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">权重 × V</text>
+<text x="860.0" y="321.11" font-size="11" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">得到头输出</text>
+<path d="M860.0,206 L860.0,224" fill="none" stroke="#475569" stroke-width="1.2" marker-end="url(#ar)"/>
+<path d="M860.0,264 L860.0,282" fill="none" stroke="#475569" stroke-width="1.2" marker-end="url(#ar)"/>
+<text x="662.0" y="404" font-size="12" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">…… 共 8 个头，每个头只看 64 维子空间</text>
+<path d="M922,226 L958,226" fill="none" stroke="#0891b2" stroke-width="1.7" marker-end="url(#ar-teal)"/>
+<rect x="958" y="146" width="156" height="160" rx="10" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+<text x="1036.0" y="215.32999999999998" font-size="11.0" fill="#7c3aed" text-anchor="middle" font-weight="600" opacity="1.0">拼接 Concat</text>
+<text x="1036.0" y="229.85" font-size="11.0" fill="#7c3aed" text-anchor="middle" font-weight="600" opacity="1.0">8 × 64 = 512</text>
+<text x="1036.0" y="244.36999999999998" font-size="11.0" fill="#7c3aed" text-anchor="middle" font-weight="600" opacity="1.0">线性 W_O</text>
+<path d="M1114,226 L1146,226" fill="none" stroke="#2563eb" stroke-width="1.6" marker-end="url(#ar-blue)"/>
+<text x="1152" y="212" font-size="12.5" fill="#2563eb" text-anchor="start" font-weight="600" opacity="1.0">输出</text>
+<text x="1152" y="232" font-size="9.5" fill="#94a3b8" text-anchor="start" font-weight="500" opacity="1.0">[2, 5, 512]</text>
+</svg>

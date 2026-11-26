@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 560" width="660" height="560" font-family="'Inter','Noto Sans SC',system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+  <marker id="ar-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+  <marker id="ar-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+  <marker id="ar-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0891b2"/></marker>
+  <marker id="ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b45309"/></marker>
+  <marker id="ar-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker>
+</defs>
+<rect y="0" width="660" height="560" fill="#ffffff"/>
+<text x="250" y="52" font-size="11.5" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">输出</text>
+<path d="M250,64 L250,90" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#ar)"/>
+<rect x="120.0" y="94" width="260" height="36" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="250.0" y="116.2" font-size="12" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">层归一化 LayerNorm</text>
+<path d="M250,136 L250,164" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#ar)"/>
+<rect x="120.0" y="168" width="260" height="86" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="250.0" y="207.9" font-size="10.0" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">前馈全连接 FFN</text>
+<text x="250.0" y="221.1" font-size="10.0" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">Linear 512 → 1024 → 512</text>
+<path d="M250,260 L250,288" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#ar)"/>
+<rect x="120.0" y="292" width="260" height="36" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="250.0" y="314.2" font-size="12" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">层归一化 LayerNorm</text>
+<path d="M250,334 L250,362" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#ar)"/>
+<rect x="120.0" y="366" width="260" height="86" rx="10" fill="#ecfeff" stroke="#0891b2" stroke-width="1.5"/>
+<text x="250.0" y="404.815" font-size="13.5" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">多头自注意力</text>
+<text x="250.0" y="422.635" font-size="13.5" fill="#0f172a" text-anchor="middle" font-weight="600" opacity="1.0">8 个头，d_k = 64</text>
+<path d="M250,458 L250,486" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#ar)"/>
+<text x="250" y="506" font-size="11.5" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">输入 X  [2, 5, 512]</text>
+<path d="M250,476 L450,476 L450,112 L412.0,112" fill="none" stroke="#b45309" stroke-width="1.6" marker-end="url(#ar-amber)"/>
+<circle cx="398.0" cy="112" r="13" fill="#ffffff" stroke="#b45309" stroke-width="1.5"/>
+<text x="398.0" y="117.1" font-size="15" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">+</text>
+<path d="M250,356 L450,356 L450,310 L412.0,310" fill="none" stroke="#b45309" stroke-width="1.6" marker-end="url(#ar-amber)"/>
+<circle cx="398.0" cy="310" r="13" fill="#ffffff" stroke="#b45309" stroke-width="1.5"/>
+<text x="398.0" y="315.1" font-size="15" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">+</text>
+<text x="466" y="300" font-size="10.5" fill="#b45309" text-anchor="start" font-weight="600" opacity="0.85">残差</text>
+<text x="250" y="546" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">x + Dropout( Norm( 子层(x) ) )</text>
+</svg>

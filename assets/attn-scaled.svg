@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 108 1160 320" width="1160" height="320" font-family="'Inter','Noto Sans SC',system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+  <marker id="ar-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+  <marker id="ar-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+  <marker id="ar-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0891b2"/></marker>
+  <marker id="ar-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b45309"/></marker>
+  <marker id="ar-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker>
+</defs>
+<rect y="108" width="1160" height="320" fill="#ffffff"/>
+<rect x="56" y="130" width="122" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="117.0" y="160.95" font-size="17" fill="#2563eb" text-anchor="middle" font-weight="600" opacity="1.0">Q</text>
+<rect x="56" y="320" width="122" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="117.0" y="350.95" font-size="17" fill="#2563eb" text-anchor="middle" font-weight="600" opacity="1.0">K</text>
+<text x="117" y="200" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">查询：我要找什么</text>
+<text x="117" y="392" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">键：每个位置的标签</text>
+<path d="M180,158 L228,240" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<path d="M180,342 L228,260" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<circle cx="248" cy="250" r="22" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.6"/>
+<text x="248" y="256" font-size="17" fill="#2563eb" text-anchor="middle" font-weight="700" opacity="1.0">×</text>
+<text x="248" y="294" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">MatMul</text>
+<path d="M270,250 L340,250" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="342" y="220" width="148" height="60" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="416.0" y="245.97" font-size="13" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">缩放</text>
+<text x="416.0" y="263.13" font-size="13" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">1 / √d_k</text>
+<path d="M490,250 L528,250" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="530" y="220" width="148" height="60" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="604.0" y="247.36499999999998" font-size="8.5" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">掩码（可选）</text>
+<text x="604.0" y="258.585" font-size="8.5" fill="#475569" text-anchor="middle" font-weight="600" opacity="1.0">padding / 未来信息</text>
+<path d="M678,250 L716,250" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<rect x="718" y="220" width="118" height="60" rx="10" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+<text x="777.0" y="254.725" font-size="13.5" fill="#b45309" text-anchor="middle" font-weight="600" opacity="1.0">Softmax</text>
+<text x="772" y="302" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">权重 [2, 8, 5, 5]</text>
+<path d="M836,250 L878,250" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<circle cx="900" cy="250" r="22" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.6"/>
+<text x="900" y="256" font-size="17" fill="#2563eb" text-anchor="middle" font-weight="700" opacity="1.0">×</text>
+<text x="930" y="296" font-size="11" fill="#94a3b8" text-anchor="start" font-weight="500" opacity="1.0">MatMul</text>
+<rect x="838" y="320" width="122" height="50" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="899.0" y="350.95" font-size="17" fill="#2563eb" text-anchor="middle" font-weight="600" opacity="1.0">V</text>
+<text x="899" y="392" font-size="11" fill="#94a3b8" text-anchor="middle" font-weight="500" opacity="1.0">值：被加权的内容</text>
+<path d="M884,318 L884,276" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#ar)"/>
+<path d="M922,250 L1042,250" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
+<text x="1052" y="244" font-size="12.5" fill="#2563eb" text-anchor="start" font-weight="600" opacity="1.0">注意力输出</text>
+<text x="1052" y="264" font-size="10.5" fill="#94a3b8" text-anchor="start" font-weight="500" opacity="1.0">[2, 5, 512]</text>
+</svg>
